@@ -13,6 +13,7 @@ class UserTest extends TestCase
 {
     use RefreshDatabase;
 
+    // ~~~indexアクション（会員一覧ページ）~~~
     // 未ログインのユーザーは管理者側の会員一覧ページにアクセスできない
     public function test_guest_cannot_access_admin_users_index()
     {
@@ -55,6 +56,7 @@ class UserTest extends TestCase
         $response->assertStatus(200);
     }
 
+    // ~~showアクション（会員詳細ページ）~~
     // 未ログインのユーザーは管理者側の会員詳細ページにアクセスできない
     public function test_guest_cannot_access_admin_users_show()
     {
