@@ -5,6 +5,7 @@ namespace Tests\Feature\Admin;
 use App\Models\Admin;
 use App\Models\User;
 use App\Models\Restaurant;
+use App\Models\Category;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -155,7 +156,11 @@ class RestaurantTest extends TestCase
         // ユーザーがログインされていないことの確認
         $this->assertGuest();
 
-        // 店舗のデータ
+        // カテゴリーのデータ内にあるIDを取得する
+        $categories = Category::factory()->count(3)->create();
+        $category_ids = $categories->pluck('id')->toArray();
+
+        // 店舗のデータ + カテゴリ
         $restaurant_data = [
             'name' => 'テストテスト',
             'description' => 'テストテスト',
@@ -166,13 +171,22 @@ class RestaurantTest extends TestCase
             'opening_time' => '10:00:00',
             'closing_time' => '20:00:00',
             'seating_capacity' => 50,
+            'category_ids' => $category_ids
         ];
 
         // 店舗登録リクエストの送信
         $response = $this->post(route('admin.restaurants.store'), $restaurant_data);
 
+        // 店舗のデータにあるcategory_idsはrestaurantsテーブルには存在しないため削除
+        unset($restaurant_data['category_ids']);
+
         // restaurants テーブルに店舗が登録されていないことを確認
         $this->assertDatabaseMissing('restaurants', $restaurant_data);
+
+        // category_restaurant テーブルにカテゴリが登録されていないことを確認
+        foreach ($category_ids as $category_id) {
+            $this->assertDatabaseMissing('category_restaurant', ['category_id' => $category_id]);
+        }
 
         // リダイレクト
         $response->assertRedirect(route('admin.login'));
@@ -185,7 +199,11 @@ class RestaurantTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        // 店舗のデータ
+        // カテゴリーのデータ内にあるIDを取得する
+        $categories = Category::factory()->count(3)->create();
+        $category_ids = $categories->pluck('id')->toArray();
+
+        // 店舗のデータ + カテゴリ
         $restaurant_data = [
             'name' => 'テストテスト',
             'description' => 'テストテスト',
@@ -196,13 +214,22 @@ class RestaurantTest extends TestCase
             'opening_time' => '10:00:00',
             'closing_time' => '20:00:00',
             'seating_capacity' => 50,
+            'category_ids' => $category_ids
         ];
 
         // 店舗登録リクエストの送信
         $response = $this->post(route('admin.restaurants.store'), $restaurant_data);
 
+        // 店舗のデータにあるcategory_idsはrestaurantsテーブルには存在しないため削除
+        unset($restaurant_data['category_ids']);
+
         // restaurants テーブルに店舗が登録されていないことを確認
         $this->assertDatabaseMissing('restaurants', $restaurant_data);
+
+        // category_restaurant テーブルにカテゴリが登録されていないことを確認
+        foreach ($category_ids as $category_id) {
+            $this->assertDatabaseMissing('category_restaurant', ['category_id' => $category_id]);
+        }
 
         // リダイレクト
         $response->assertRedirect(route('admin.login'));
@@ -215,7 +242,12 @@ class RestaurantTest extends TestCase
         $admin = Admin::factory()->create();
         $this->actingAs($admin, 'admin');
 
-        // 店舗のデータ
+
+        // カテゴリーのデータ内にあるIDを取得する
+        $categories = Category::factory()->count(3)->create();
+        $category_ids = $categories->pluck('id')->toArray();
+
+        // 店舗のデータ + カテゴリ
         $restaurant_data = [
             'name' => 'テストテスト',
             'description' => 'テストテスト',
@@ -226,13 +258,25 @@ class RestaurantTest extends TestCase
             'opening_time' => '10:00:00',
             'closing_time' => '20:00:00',
             'seating_capacity' => 50,
+            'category_ids' => $category_ids
         ];
 
         // 店舗登録リクエストの送信
         $response = $this->post(route('admin.restaurants.store'), $restaurant_data);
 
+        // 店舗のデータにあるcategory_idsはrestaurantsテーブルには存在しないため削除
+        unset($restaurant_data['category_ids']);
+
         // restaurants テーブルに店舗が登録されていることを確認
         $this->assertDatabaseHas('restaurants', $restaurant_data);
+
+        // restaurants テーブルの中で最新のIDをを取得
+        $restaurant = Restaurant::latest('id')->first();
+
+        // category_restaurant テーブルにカテゴリが登録されていることを確認
+        foreach ($category_ids as $category_id) {
+            $this->assertDatabaseHas('category_restaurant', ['restaurant_id' => $restaurant->id, 'category_id' => $category_id]);
+        }
 
         // リダイレクト
         $response->assertRedirect(route('admin.restaurants.index'));
@@ -296,10 +340,14 @@ class RestaurantTest extends TestCase
         // 一般ユーザーアカウントの未承認
         $this->assertGuest();
 
+        // カテゴリーのデータ内にあるIDを取得する
+        $categories = Category::factory()->count(3)->create();
+        $category_ids = $categories->pluck('id')->toArray();
+
         // 更新「前」の店舗アカウント作成
         $restaurant_data_old = Restaurant::factory()->create();
 
-        // 更新「後」の店舗アカウント作成
+        // 更新「後」の店舗アカウント作成 + カテゴリ
         $restaurant_data_new = [
             'name' => '更新',
             'description' => '更新',
@@ -309,13 +357,23 @@ class RestaurantTest extends TestCase
             'address' => '更新',
             'opening_time' => '14:00:00',
             'closing_time' => '24:00:00',
-            'seating_capacity' => 80
+            'seating_capacity' => 80,
+            'category_ids' => $category_ids
         ];
+
         // 店舗更新リクエストの送信
         $response = $this->patch(route('admin.restaurants.update', $restaurant_data_old), $restaurant_data_new);
 
+        // 店舗のデータにあるcategory_idsはrestaurantsテーブルには存在しないため削除
+        unset($restaurant_data_new['category_ids']);
+
         // restaurants テーブルに店舗が更新されていないことを確認
         $this->assertDatabaseMissing('restaurants', $restaurant_data_new);
+
+        // category_restaurant テーブルにカテゴリが登録されていないことを確認
+        foreach ($category_ids as $category_id) {
+            $this->assertDatabaseMissing('category_restaurant', ['category_id' => $category_id]);
+        }
 
         // リダイレクト
         $response->assertRedirect(route('admin.login'));
@@ -328,10 +386,14 @@ class RestaurantTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
+        // カテゴリーのデータ内にあるIDを取得する
+        $categories = Category::factory()->count(3)->create();
+        $category_ids = $categories->pluck('id')->toArray();
+
         // 更新「前」の店舗アカウント作成
         $restaurant_data_old = Restaurant::factory()->create();
 
-        // 更新「後」の店舗アカウント作成
+        // 更新「後」の店舗アカウント作成 + カテゴリ
         $restaurant_data_new = [
             'name' => '更新',
             'description' => '更新',
@@ -341,13 +403,23 @@ class RestaurantTest extends TestCase
             'address' => '更新',
             'opening_time' => '14:00:00',
             'closing_time' => '24:00:00',
-            'seating_capacity' => 80
+            'seating_capacity' => 80,
+            'category_ids' => $category_ids
         ];
+
         // 店舗更新リクエストの送信
         $response = $this->patch(route('admin.restaurants.update', $restaurant_data_old), $restaurant_data_new);
 
+        // 店舗のデータにあるcategory_idsはrestaurantsテーブルには存在しないため削除
+        unset($restaurant_data_new['category_ids']);
+
         // restaurants テーブルに店舗が更新されていないことを確認
         $this->assertDatabaseMissing('restaurants', $restaurant_data_new);
+
+        // category_restaurant テーブルにカテゴリが登録されていないことを確認
+        foreach ($category_ids as $category_id) {
+            $this->assertDatabaseMissing('category_restaurant', ['category_id' => $category_id]);
+        }
 
         // リダイレクト
         $response->assertRedirect(route('admin.login'));
@@ -360,10 +432,14 @@ class RestaurantTest extends TestCase
         $admin = Admin::factory()->create();
         $this->actingAs($admin, 'admin');
 
+        // カテゴリーのデータ内にあるIDを取得する
+        $categories = Category::factory()->count(3)->create();
+        $category_ids = $categories->pluck('id')->toArray();
+
         // 更新「前」の店舗アカウント作成
         $restaurant_data_old = Restaurant::factory()->create();
 
-        // 更新「後」の店舗アカウント作成
+        // 更新「後」の店舗アカウント作成 + カテゴリ
         $restaurant_data_new = [
             'name' => '更新',
             'description' => '更新',
@@ -373,14 +449,26 @@ class RestaurantTest extends TestCase
             'address' => '更新',
             'opening_time' => '14:00:00',
             'closing_time' => '24:00:00',
-            'seating_capacity' => 80
+            'seating_capacity' => 80,
+            'category_ids' => $category_ids
         ];
 
-        // 店舗更新リクエストの送信
+        // 店舗登録リクエストの送信
         $response = $this->patch(route('admin.restaurants.update', $restaurant_data_old), $restaurant_data_new);
 
-        // restaurants テーブルに店舗が更新されていることを確認
+        // 店舗のデータにあるcategory_idsはrestaurantsテーブルには存在しないため削除
+        unset($restaurant_data_new['category_ids']);
+
+        // restaurants テーブルに店舗が登録されていることを確認
         $this->assertDatabaseHas('restaurants', $restaurant_data_new);
+
+        // restaurants テーブルの中で最新のIDをを取得
+        $restaurant = Restaurant::latest('id')->first();
+
+        // category_restaurant テーブルにカテゴリが登録されていることを確認
+        foreach ($category_ids as $category_id) {
+            $this->assertDatabaseHas('category_restaurant', ['restaurant_id' => $restaurant->id, 'category_id' => $category_id]);
+        }
 
         // リダイレクト
         $response->assertRedirect(route('admin.restaurants.show', $restaurant_data_old));

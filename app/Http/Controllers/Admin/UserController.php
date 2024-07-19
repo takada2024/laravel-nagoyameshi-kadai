@@ -8,6 +8,9 @@ use App\Models\User;
 
 class UserController extends Controller
 {
+    /**
+     *  index
+     */
     public function index(Request $request)
     {
         $keyword = $request->input('keyword');
@@ -23,6 +26,9 @@ class UserController extends Controller
         return view('admin.users.index', compact('users', 'keyword', 'total'));
     }
 
+    /**
+     *  show
+     */
     public function show(User $user)
     {
         return view('admin.users.show', compact('user'));

@@ -12,7 +12,7 @@ class Restaurant extends Model
     protected $fillable = [
         'name',
         'description',
-        'lowest_price' ,
+        'lowest_price',
         'highest_price',
         'postal_code',
         'address',
@@ -20,4 +20,9 @@ class Restaurant extends Model
         'closing_time',
         'seating_capacity',
     ];
+
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class)->withTimestamps();
+    }
 }

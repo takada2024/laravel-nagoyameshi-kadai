@@ -8,6 +8,9 @@ use App\Models\Category;
 
 class CategoryController extends Controller
 {
+    /**
+     *  index
+     */
     public function index(Request $request)
     {
         $keyword = $request->input('keyword');
@@ -23,6 +26,9 @@ class CategoryController extends Controller
         return view('admin.categories.index', compact('categories', 'keyword', 'total'));
     }
 
+    /**
+     *  store
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -36,6 +42,9 @@ class CategoryController extends Controller
         return redirect()->route('admin.categories.index')->with('flash_message', 'カテゴリを登録しました。');
     }
 
+    /**
+     *  update
+     */
     public function update(Request $request, Category $category)
     {
         $request->validate([
@@ -48,6 +57,9 @@ class CategoryController extends Controller
         return redirect()->route('admin.categories.index')->with('flash_message', 'カテゴリを編集しました。');
     }
 
+    /**
+     *  destroy
+     */
     public function destroy(Category $category)
     {
         $category->delete();
