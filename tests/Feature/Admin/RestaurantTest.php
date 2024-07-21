@@ -6,6 +6,7 @@ use App\Models\Admin;
 use App\Models\User;
 use App\Models\Restaurant;
 use App\Models\Category;
+use App\Models\RegularHoliday;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
@@ -160,7 +161,11 @@ class RestaurantTest extends TestCase
         $categories = Category::factory()->count(3)->create();
         $category_ids = $categories->pluck('id')->toArray();
 
-        // 店舗のデータ + カテゴリ
+        // 定休日のデータ内にあるIDを取得する
+        $regular_holidays = RegularHoliday::factory()->create();
+        $regular_holiday_ids = $regular_holidays->pluck('id')->toArray();
+
+        // 店舗のデータ + カテゴリ + 定休日
         $restaurant_data = [
             'name' => 'テストテスト',
             'description' => 'テストテスト',
@@ -171,14 +176,18 @@ class RestaurantTest extends TestCase
             'opening_time' => '10:00:00',
             'closing_time' => '20:00:00',
             'seating_capacity' => 50,
-            'category_ids' => $category_ids
+            'category_ids' => $category_ids,
+            'regular_holiday_ids' => $regular_holiday_ids
         ];
 
         // 店舗登録リクエストの送信
         $response = $this->post(route('admin.restaurants.store'), $restaurant_data);
 
-        // 店舗のデータにあるcategory_idsはrestaurantsテーブルには存在しないため削除
+        // 店舗のデータにあるcategory_idsは restaurantsテーブルには存在しないため削除
         unset($restaurant_data['category_ids']);
+
+        // 店舗のデータにあるregular_holiday_idsは restaurantsテーブルには存在しないため削除
+        unset($restaurant_data['regular_holiday_ids']);
 
         // restaurants テーブルに店舗が登録されていないことを確認
         $this->assertDatabaseMissing('restaurants', $restaurant_data);
@@ -186,6 +195,11 @@ class RestaurantTest extends TestCase
         // category_restaurant テーブルにカテゴリが登録されていないことを確認
         foreach ($category_ids as $category_id) {
             $this->assertDatabaseMissing('category_restaurant', ['category_id' => $category_id]);
+        }
+
+        // regular_holiday_ids テーブルに定休日が登録されていないことを確認
+        foreach ($regular_holiday_ids as $regular_holiday_id) {
+            $this->assertDatabaseMissing('regular_holiday_restaurant', ['regular_holiday_id' => $regular_holiday_id]);
         }
 
         // リダイレクト
@@ -203,7 +217,11 @@ class RestaurantTest extends TestCase
         $categories = Category::factory()->count(3)->create();
         $category_ids = $categories->pluck('id')->toArray();
 
-        // 店舗のデータ + カテゴリ
+        // 定休日のデータ内にあるIDを取得する
+        $regular_holidays = RegularHoliday::factory()->create();
+        $regular_holiday_ids = $regular_holidays->pluck('id')->toArray();
+
+        // 店舗のデータ + カテゴリ + 定休日
         $restaurant_data = [
             'name' => 'テストテスト',
             'description' => 'テストテスト',
@@ -214,14 +232,18 @@ class RestaurantTest extends TestCase
             'opening_time' => '10:00:00',
             'closing_time' => '20:00:00',
             'seating_capacity' => 50,
-            'category_ids' => $category_ids
+            'category_ids' => $category_ids,
+            'regular_holiday_ids' => $regular_holiday_ids
         ];
 
         // 店舗登録リクエストの送信
         $response = $this->post(route('admin.restaurants.store'), $restaurant_data);
 
-        // 店舗のデータにあるcategory_idsはrestaurantsテーブルには存在しないため削除
+        // 店舗のデータにあるcategory_idsは restaurantsテーブルには存在しないため削除
         unset($restaurant_data['category_ids']);
+
+        // 店舗のデータにあるregular_holiday_idsは restaurantsテーブルには存在しないため削除
+        unset($restaurant_data['regular_holiday_ids']);
 
         // restaurants テーブルに店舗が登録されていないことを確認
         $this->assertDatabaseMissing('restaurants', $restaurant_data);
@@ -229,6 +251,11 @@ class RestaurantTest extends TestCase
         // category_restaurant テーブルにカテゴリが登録されていないことを確認
         foreach ($category_ids as $category_id) {
             $this->assertDatabaseMissing('category_restaurant', ['category_id' => $category_id]);
+        }
+
+        // regular_holiday_ids テーブルに定休日が登録されていないことを確認
+        foreach ($regular_holiday_ids as $regular_holiday_id) {
+            $this->assertDatabaseMissing('regular_holiday_restaurant', ['regular_holiday_id' => $regular_holiday_id]);
         }
 
         // リダイレクト
@@ -247,7 +274,11 @@ class RestaurantTest extends TestCase
         $categories = Category::factory()->count(3)->create();
         $category_ids = $categories->pluck('id')->toArray();
 
-        // 店舗のデータ + カテゴリ
+        // 定休日のデータ内にあるIDを取得する
+        $regular_holidays = RegularHoliday::factory()->create();
+        $regular_holiday_ids = $regular_holidays->pluck('id')->toArray();
+
+        // 店舗のデータ + カテゴリ + 定休日
         $restaurant_data = [
             'name' => 'テストテスト',
             'description' => 'テストテスト',
@@ -258,14 +289,18 @@ class RestaurantTest extends TestCase
             'opening_time' => '10:00:00',
             'closing_time' => '20:00:00',
             'seating_capacity' => 50,
-            'category_ids' => $category_ids
+            'category_ids' => $category_ids,
+            'regular_holiday_ids' => $regular_holiday_ids
         ];
 
         // 店舗登録リクエストの送信
         $response = $this->post(route('admin.restaurants.store'), $restaurant_data);
 
-        // 店舗のデータにあるcategory_idsはrestaurantsテーブルには存在しないため削除
+        // 店舗のデータにあるcategory_idsは restaurantsテーブルには存在しないため削除
         unset($restaurant_data['category_ids']);
+
+        // 店舗のデータにあるregular_holiday_idは restaurantsテーブルには存在しないため削除
+        unset($restaurant_data['regular_holiday_ids']);
 
         // restaurants テーブルに店舗が登録されていることを確認
         $this->assertDatabaseHas('restaurants', $restaurant_data);
@@ -276,6 +311,11 @@ class RestaurantTest extends TestCase
         // category_restaurant テーブルにカテゴリが登録されていることを確認
         foreach ($category_ids as $category_id) {
             $this->assertDatabaseHas('category_restaurant', ['restaurant_id' => $restaurant->id, 'category_id' => $category_id]);
+        }
+
+        // regular_holiday_restaurant テーブルに定休日が登録されていることを確認
+        foreach ($regular_holiday_ids as $regular_holiday_id) {
+            $this->assertDatabaseHas('regular_holiday_restaurant', ['restaurant_id' => $restaurant->id, 'regular_holiday_id' => $regular_holiday_id]);
         }
 
         // リダイレクト
@@ -344,10 +384,14 @@ class RestaurantTest extends TestCase
         $categories = Category::factory()->count(3)->create();
         $category_ids = $categories->pluck('id')->toArray();
 
+        // 定休日のデータ内にあるIDを取得する
+        $regular_holidays = RegularHoliday::factory()->create();
+        $regular_holiday_ids = $regular_holidays->pluck('id')->toArray();
+
         // 更新「前」の店舗アカウント作成
         $restaurant_data_old = Restaurant::factory()->create();
 
-        // 更新「後」の店舗アカウント作成 + カテゴリ
+        // 更新「後」の店舗アカウント作成 + カテゴリ + 定休日
         $restaurant_data_new = [
             'name' => '更新',
             'description' => '更新',
@@ -358,14 +402,18 @@ class RestaurantTest extends TestCase
             'opening_time' => '14:00:00',
             'closing_time' => '24:00:00',
             'seating_capacity' => 80,
-            'category_ids' => $category_ids
+            'category_ids' => $category_ids,
+            'regular_holiday_ids' => $regular_holiday_ids
         ];
 
         // 店舗更新リクエストの送信
         $response = $this->patch(route('admin.restaurants.update', $restaurant_data_old), $restaurant_data_new);
 
-        // 店舗のデータにあるcategory_idsはrestaurantsテーブルには存在しないため削除
+        // 店舗のデータにあるcategory_idsは restaurantsテーブルには存在しないため削除
         unset($restaurant_data_new['category_ids']);
+
+        // 店舗のデータにあるregular_holiday_idsは restaurantsテーブルには存在しないため削除
+        unset($restaurant_data_new['regular_holiday_ids']);
 
         // restaurants テーブルに店舗が更新されていないことを確認
         $this->assertDatabaseMissing('restaurants', $restaurant_data_new);
@@ -373,6 +421,11 @@ class RestaurantTest extends TestCase
         // category_restaurant テーブルにカテゴリが登録されていないことを確認
         foreach ($category_ids as $category_id) {
             $this->assertDatabaseMissing('category_restaurant', ['category_id' => $category_id]);
+        }
+
+        // regular_holiday_ids テーブルに定休日が登録されていないことを確認
+        foreach ($regular_holiday_ids as $regular_holiday_id) {
+            $this->assertDatabaseMissing('regular_holiday_restaurant', ['regular_holiday_id' => $regular_holiday_id]);
         }
 
         // リダイレクト
@@ -390,10 +443,14 @@ class RestaurantTest extends TestCase
         $categories = Category::factory()->count(3)->create();
         $category_ids = $categories->pluck('id')->toArray();
 
+        // 定休日のデータ内にあるIDを取得する
+        $regular_holidays = RegularHoliday::factory()->create();
+        $regular_holiday_ids = $regular_holidays->pluck('id')->toArray();
+
         // 更新「前」の店舗アカウント作成
         $restaurant_data_old = Restaurant::factory()->create();
 
-        // 更新「後」の店舗アカウント作成 + カテゴリ
+        // 更新「後」の店舗アカウント作成 + カテゴリ + 定休日
         $restaurant_data_new = [
             'name' => '更新',
             'description' => '更新',
@@ -404,14 +461,18 @@ class RestaurantTest extends TestCase
             'opening_time' => '14:00:00',
             'closing_time' => '24:00:00',
             'seating_capacity' => 80,
-            'category_ids' => $category_ids
+            'category_ids' => $category_ids,
+            'regular_holiday_ids' => $regular_holiday_ids
         ];
 
         // 店舗更新リクエストの送信
         $response = $this->patch(route('admin.restaurants.update', $restaurant_data_old), $restaurant_data_new);
 
-        // 店舗のデータにあるcategory_idsはrestaurantsテーブルには存在しないため削除
+        // 店舗のデータにあるcategory_idsは restaurantsテーブルには存在しないため削除
         unset($restaurant_data_new['category_ids']);
+
+        // 店舗のデータにあるregular_holiday_idsは restaurantsテーブルには存在しないため削除
+        unset($restaurant_data_new['regular_holiday_ids']);
 
         // restaurants テーブルに店舗が更新されていないことを確認
         $this->assertDatabaseMissing('restaurants', $restaurant_data_new);
@@ -419,6 +480,11 @@ class RestaurantTest extends TestCase
         // category_restaurant テーブルにカテゴリが登録されていないことを確認
         foreach ($category_ids as $category_id) {
             $this->assertDatabaseMissing('category_restaurant', ['category_id' => $category_id]);
+        }
+
+        // regular_holiday_ids テーブルに定休日が登録されていないことを確認
+        foreach ($regular_holiday_ids as $regular_holiday_id) {
+            $this->assertDatabaseMissing('regular_holiday_restaurant', ['regular_holiday_id' => $regular_holiday_id]);
         }
 
         // リダイレクト
@@ -436,10 +502,14 @@ class RestaurantTest extends TestCase
         $categories = Category::factory()->count(3)->create();
         $category_ids = $categories->pluck('id')->toArray();
 
+        // 定休日のデータ内にあるIDを取得する
+        $regular_holidays = RegularHoliday::factory()->create();
+        $regular_holiday_ids = $regular_holidays->pluck('id')->toArray();
+
         // 更新「前」の店舗アカウント作成
         $restaurant_data_old = Restaurant::factory()->create();
 
-        // 更新「後」の店舗アカウント作成 + カテゴリ
+        // 更新「後」の店舗アカウント作成 + カテゴリ + 定休日
         $restaurant_data_new = [
             'name' => '更新',
             'description' => '更新',
@@ -450,14 +520,18 @@ class RestaurantTest extends TestCase
             'opening_time' => '14:00:00',
             'closing_time' => '24:00:00',
             'seating_capacity' => 80,
-            'category_ids' => $category_ids
+            'category_ids' => $category_ids,
+            'regular_holiday_ids' => $regular_holiday_ids
         ];
 
         // 店舗登録リクエストの送信
         $response = $this->patch(route('admin.restaurants.update', $restaurant_data_old), $restaurant_data_new);
 
-        // 店舗のデータにあるcategory_idsはrestaurantsテーブルには存在しないため削除
+        // 店舗のデータにあるcategory_idsは restaurantsテーブルには存在しないため削除
         unset($restaurant_data_new['category_ids']);
+
+        // 店舗のデータにあるregular_holiday_idsは restaurantsテーブルには存在しないため削除
+        unset($restaurant_data_new['regular_holiday_ids']);
 
         // restaurants テーブルに店舗が登録されていることを確認
         $this->assertDatabaseHas('restaurants', $restaurant_data_new);
@@ -468,6 +542,11 @@ class RestaurantTest extends TestCase
         // category_restaurant テーブルにカテゴリが登録されていることを確認
         foreach ($category_ids as $category_id) {
             $this->assertDatabaseHas('category_restaurant', ['restaurant_id' => $restaurant->id, 'category_id' => $category_id]);
+        }
+
+        // regular_holiday_ids テーブルに定休日が登録されていることを確認
+        foreach ($regular_holiday_ids as $regular_holiday_id) {
+            $this->assertDatabaseHas('regular_holiday_restaurant', ['regular_holiday_id' => $regular_holiday_id]);
         }
 
         // リダイレクト
