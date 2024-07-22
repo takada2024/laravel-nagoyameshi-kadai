@@ -1,0 +1,2 @@
+INSERT INTO `users` (`name`, `kana`, `email`, `email_verified_at`, `password`, `postal_code`, `address`, `phone_number`, `birthday`, `occupation`, `remember_token`, `created_at`, `updated_at`) VALUES
+('侍 太郎', 'サムライ タロウ', 'user@example.com', '2023-12-23 11:31:30', '$2y$10$.Dui/WN2mFq96T/78zMEl.iF3JtN7AGXmiEfGOZwjWaUgZTBVuGZG', '0000000', '東京都 港区 マンション', '09012345678', '2000-04-01', 'エンジニア', NULL, '2023-12-23 11:31:30', '2023-12-23 11:31:30');

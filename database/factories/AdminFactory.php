@@ -18,7 +18,7 @@ class AdminFactory extends Factory
     public function definition(): array
     {
         return [
-            'email' => 'test@test.com',
+            'email' => fake()->unique()->safeEmail(),
             'password' => Hash::make('experiment'),
         ];
     }
