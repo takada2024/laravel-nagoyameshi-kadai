@@ -11,6 +11,8 @@ use Tests\TestCase;
 
 class HomeTest extends TestCase
 {
+    use RefreshDatabase;
+
     // ~~~indexアクション（店舗一覧ページ）~~~
     // 未ログインのユーザーは会員側のトップページにアクセスできる
     public function test_guest_can_access_home()
@@ -18,7 +20,7 @@ class HomeTest extends TestCase
         // 一般ユーザーアカウントの未承認
         $this->assertGuest();
 
-        // 店舗一覧ページページにアクセス
+        // 店舗一覧ページにアクセス
         $response = $this->get(route('home'));
 
         // アクセス成功したか確認
@@ -32,7 +34,7 @@ class HomeTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        // 店舗一覧ページページにアクセス
+        // 店舗一覧ページにアクセス
         $response = $this->get(route('home'));
 
         // アクセス成功したか確認
@@ -46,7 +48,7 @@ class HomeTest extends TestCase
         $admin = Admin::factory()->create();
         $this->actingAs($admin, 'admin');
 
-        // 店舗一覧ページページにアクセス
+        // 店舗一覧ページにアクセス
         $response = $this->get(route('home'));
 
         // リダイレクト
