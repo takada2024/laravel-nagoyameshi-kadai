@@ -41,5 +41,5 @@ Route::middleware(['auth', 'verified', 'guest:admin'])->group(function () {
 });
 
 Route::middleware(['guest:admin'])->group(function () {
-    Route::resource('restaurants', RestaurantController::class)->only(['index']);
+    Route::resource('restaurants', RestaurantController::class)->only(['index', 'show']);
 });
