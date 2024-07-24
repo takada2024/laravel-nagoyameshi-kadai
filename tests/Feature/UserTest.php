@@ -20,7 +20,7 @@ class UserTest extends TestCase
         $guest = User::factory()->create();
         $this->assertGuest();
 
-        // 会員側の会員情報ページページにアクセス
+        // 会員側の会員情報ページにアクセス
         $response = $this->get(route('user.index'));
 
         // リダイレクト
