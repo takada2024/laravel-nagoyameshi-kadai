@@ -162,7 +162,7 @@ class RestaurantTest extends TestCase
         $category_ids = $categories->pluck('id')->toArray();
 
         // 定休日のデータ内にあるIDを取得する
-        $regular_holidays = RegularHoliday::factory()->create();
+        $regular_holidays = RegularHoliday::factory()->count(3)->create();
         $regular_holiday_ids = $regular_holidays->pluck('id')->toArray();
 
         // 店舗のデータ + カテゴリ + 定休日
@@ -218,7 +218,7 @@ class RestaurantTest extends TestCase
         $category_ids = $categories->pluck('id')->toArray();
 
         // 定休日のデータ内にあるIDを取得する
-        $regular_holidays = RegularHoliday::factory()->create();
+        $regular_holidays = RegularHoliday::factory()->count(3)->create();
         $regular_holiday_ids = $regular_holidays->pluck('id')->toArray();
 
         // 店舗のデータ + カテゴリ + 定休日
@@ -275,7 +275,7 @@ class RestaurantTest extends TestCase
         $category_ids = $categories->pluck('id')->toArray();
 
         // 定休日のデータ内にあるIDを取得する
-        $regular_holidays = RegularHoliday::factory()->create();
+        $regular_holidays = RegularHoliday::factory()->count(3)->create();
         $regular_holiday_ids = $regular_holidays->pluck('id')->toArray();
 
         // 店舗のデータ + カテゴリ + 定休日
@@ -385,7 +385,7 @@ class RestaurantTest extends TestCase
         $category_ids = $categories->pluck('id')->toArray();
 
         // 定休日のデータ内にあるIDを取得する
-        $regular_holidays = RegularHoliday::factory()->create();
+        $regular_holidays = RegularHoliday::factory()->count(3)->create();
         $regular_holiday_ids = $regular_holidays->pluck('id')->toArray();
 
         // 更新「前」の店舗アカウント作成
@@ -444,7 +444,7 @@ class RestaurantTest extends TestCase
         $category_ids = $categories->pluck('id')->toArray();
 
         // 定休日のデータ内にあるIDを取得する
-        $regular_holidays = RegularHoliday::factory()->create();
+        $regular_holidays = RegularHoliday::factory()->count(3)->create();
         $regular_holiday_ids = $regular_holidays->pluck('id')->toArray();
 
         // 更新「前」の店舗アカウント作成
@@ -503,7 +503,7 @@ class RestaurantTest extends TestCase
         $category_ids = $categories->pluck('id')->toArray();
 
         // 定休日のデータ内にあるIDを取得する
-        $regular_holidays = RegularHoliday::factory()->create();
+        $regular_holidays = RegularHoliday::factory()->count(3)->create();
         $regular_holiday_ids = $regular_holidays->pluck('id')->toArray();
 
         // 更新「前」の店舗アカウント作成

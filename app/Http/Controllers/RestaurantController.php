@@ -33,10 +33,6 @@ class RestaurantController extends Controller
             $sorted = $request->input('select_sort');
         }
 
-        if ($request->has('select_sort')) {
-            $sorted = $request->input('select_sort');
-        }
-
         $query = Restaurant::query();
 
         if (!empty($keyword)) {
@@ -56,11 +52,8 @@ class RestaurantController extends Controller
         }
 
         if (!empty($price)) {
-            $query->where('lowest_price', '>=', "{$price}");
+            $query->where('lowest_price', '<=', "$price");
         }
-
-        $query->orderByRaw($sorted);
-
 
         $restaurants = $query->sortable($sort_query)->orderBy('created_at', 'desc')->paginate(15);
         $total = $restaurants->total();
@@ -73,6 +66,6 @@ class RestaurantController extends Controller
      */
     public function show(Restaurant $restaurant)
     {
-        return view('restaurants.show' ,compact('restaurant'));
+        return view('restaurants.show', compact('restaurant'));
     }
 }

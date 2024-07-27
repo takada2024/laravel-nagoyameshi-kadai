@@ -17,7 +17,7 @@ class RegularHolidayFactory extends Factory
     public function definition(): array
     {
         return [
-            'day' => $this->faker->dayOfWeek(),
+            'day' => fake()->dayOfWeek(),
         ];
     }
 }

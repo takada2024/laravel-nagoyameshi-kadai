@@ -170,7 +170,7 @@ class UserTest extends TestCase
         $response = $this->patch(route('user.update', $user_data_other_old), $user_data_other_new);
 
         // リダイレクト
-        $response->assertRedirect(route('login'));
+        $response->assertRedirect(route('user.index'));
     }
 
     // ログイン済みの一般ユーザーは自身の会員情報を更新できる
@@ -225,6 +225,10 @@ class UserTest extends TestCase
         $response = $this->patch(route('user.update', $guset_data), $user_data);
 
         // リダイレクト
-        $response->assertRedirect(route('login'));
+        $response->assertRedirect(route('user.index'));
     }
 }
+
+
+
+//   php artisan test tests/Feature/UserTest.php

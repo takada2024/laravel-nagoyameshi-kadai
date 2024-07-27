@@ -39,7 +39,7 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         if ($user->id !== Auth::id()) {
-            return redirect()->route('login')->with('error_message', '不正なアクセスです。');
+            return redirect()->route('user.index')->with('error_message', '不正なアクセスです。');
         }
 
         $request->validate([

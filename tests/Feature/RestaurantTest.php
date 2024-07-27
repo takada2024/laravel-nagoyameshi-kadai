@@ -68,7 +68,7 @@ class RestaurantTest extends TestCase
         $restaurant = Restaurant::factory()->create();
 
         // 会員側の店舗一覧ページにアクセス
-        $response = $this->get(route('restaurants.show', $restaurant->id));
+        $response = $this->get(route('restaurants.show', $restaurant));
 
         // アクセス成功したか確認
         $response->assertStatus(200);
@@ -85,7 +85,7 @@ class RestaurantTest extends TestCase
         $restaurant = Restaurant::factory()->create();
 
         // 会員側の店舗一覧ページにアクセス
-        $response = $this->get(route('restaurants.show', $restaurant->id));
+        $response = $this->get(route('restaurants.show', $restaurant));
 
         // アクセス成功したか確認
         $response->assertStatus(200);
@@ -102,7 +102,7 @@ class RestaurantTest extends TestCase
         $restaurant = Restaurant::factory()->create();
 
         // 会員側の店舗一覧ページにアクセス
-        $response = $this->get(route('restaurants.show', $restaurant->id));
+        $response = $this->get(route('restaurants.show', $restaurant));
 
         // リダイレクト
         $response->assertRedirect(route('admin.home'));
