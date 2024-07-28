@@ -6,7 +6,6 @@ use App\Models\Admin;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class SubscriptionTest extends TestCase
@@ -29,7 +28,7 @@ class SubscriptionTest extends TestCase
     }
 
     // ログイン済みの無料会員は有料プラン登録ページにアクセスできる
-    public function test_user_and_notsubscription_can_access_subscription_create()
+    public function test_free_user_can_access_subscription_create()
     {
         // 一般ユーザーアカウントの承認
         $user = User::factory()->create();
@@ -43,232 +42,433 @@ class SubscriptionTest extends TestCase
     }
 
     // ログイン済みの有料会員は有料プラン登録ページにアクセスできない
-    public function test_user_and_subscription_cannot_access_subscription_create()
+    public function test_paid_user_can_access_subscription_create()
     {
         // 一般ユーザーアカウントの承認
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        $user->newSubscription('premium_plan', 'price_1PgMVLGeo7j2tfrTS0pOZqj8')->create('pm_card_visa');
+        // 有料会員の承認
+        $user->newSubscription(
+            'premium_plan',
+            'price_1PgMVLGeo7j2tfrTS0pOZqj8'
+        )->create('pm_card_visa');
 
         // 有料プラン登録ページにアクセス
         $response = $this->get(route('subscription.create'));
 
         // リダイレクト
-        $response->assertStatus(200);
+        $response->assertRedirect(route('subscription.edit'));
     }
 
     // ログイン済みの管理者は有料プラン登録ページにアクセスできない
     public function test_admin_cannot_access_subscription_create()
     {
-        $admin = new Admin();
-        $admin->email = 'admin@example.com';
-        $admin->password = Hash::make('nagoyameshi');
-        $admin->save();
+        // 管理アカウントの承認
+        $admin = Admin::factory()->create();
+        $this->actingAs($admin, 'admin');
 
-        $response = $this->actingAs($admin, 'admin')->get(route('subscription.create'));
+        // 有料プラン登録ページにアクセス
+        $response = $this->get(route('subscription.create'));
 
-        $response->assertStatus(200);
+        // リダイレクト
+        $response->assertRedirect(route('admin.home'));
     }
 
-    //  // 未ログインのユーザーは有料プランに登録できない
-    public function test_guest_cannot_access_subscription_store()
+    // storeアクション（有料プラン登録機能）
+    // 未ログインのユーザーは有料プランに登録できない
+    public function test_guest_cannot_store_subscription_store()
     {
         // 一般ユーザーアカウントの非承認
         $guset = User::factory()->create();
         $this->assertGuest();
 
+        // paymentMethodIdパラメータ（支払い方法のID
         $request_parameter = [
             'paymentMethodId' => 'pm_card_visa'
         ];
 
+        // 有料プラン登録ページにアクセス
+        $response = $this->get(route('subscription.store'));
+
+        // 有料プランリクエストの送信
         $response = $this->post(route('subscription.store'), $request_parameter);
 
+        // リダイレクト
         $response->assertRedirect(route('login'));
     }
 
     // ログイン済みの無料会員は有料プランに登録できる
-    public function test_free_user_can_access_subscription_store()
+    public function test_free_user_can_store_subscription_store()
     {
         // 一般ユーザーアカウントの承認
         $user = User::factory()->create();
         $this->actingAs($user);
+
+        // paymentMethodIdパラメータ（支払い方法のID
         $request_parameter = [
             'paymentMethodId' => 'pm_card_visa'
         ];
 
-        $response = $this->actingAs($user)->post(route('subscription.store'), $request_parameter);
-        $response->assertRedirect(route('home'));
+        // 有料プラン登録ページにアクセス
+        $response = $this->get(route('subscription.store'));
+
+        // 有料プランリクエストの送信
+        $response = $this->post(route('subscription.store'), $request_parameter);
+
+        // 登録後にUserインスタンスをリフレッシュ
         $user->refresh();
-        $this->assertTrue($user->subscribed('premium_plan'));
+
+        // リダイレクト
+        $response->assertRedirect(route('home'));
     }
 
     // ログイン済みの有料会員は有料プランに登録できない
-    public function test_premium_user_cannot_access_subscription_store()
+    public function test_paid_user_cannot_store_subscription_store()
     {
+        // 一般ユーザーアカウントの承認
         $user = User::factory()->create();
-        $user->newSubscription('premium_plan', 'price_1PgMVLGeo7j2tfrTS0pOZqj8')->create('pm_card_visa');
+        $this->actingAs($user);
+
+        // 有料会員の承認
+        $user->newSubscription(
+            'premium_plan',
+            'price_1PgMVLGeo7j2tfrTS0pOZqj8'
+        )->create('pm_card_visa');
+
+        // paymentMethodIdパラメータ（支払い方法のID
         $request_parameter = [
             'paymentMethodId' => 'pm_card_visa'
         ];
-        $response = $this->actingAs($user)->post(route('subscription.store'), $request_parameter);
+
+        // 有料プラン登録ページにアクセス
+        $response = $this->get(route('subscription.store'));
+
+        // 有料プランリクエストの送信
+        $response = $this->post(route('subscription.store'), $request_parameter);
+
+        // リダイレクト
         $response->assertRedirect(route('subscription.edit'));
     }
+
     // ログイン済みの管理者は有料プランに登録できない
-    public function test_admin_cannot_access_subscription_store()
+    public function test_admin_cannot_store_subscription_store()
     {
-        $admin = new Admin();
-        $admin->email = 'admin@example.com';
-        $admin->password = Hash::make('nagoyameshi');
-        $admin->save();
+        // 管理アカウントの承認
+        $admin = Admin::factory()->create();
+        $this->actingAs($admin, 'admin');
+
+        // paymentMethodIdパラメータ（支払い方法のID
         $request_parameter = [
             'paymentMethodId' => 'pm_card_visa'
         ];
-        $response = $this->actingAs($admin, 'admin')->post(route('subscription.store'), $request_parameter);
+
+        // 有料プラン登録ページにアクセス
+        $response = $this->get(route('subscription.store'));
+
+        // 有料プランリクエストの送信
+        $response = $this->post(route('subscription.store'), $request_parameter);
+
+        // リダイレクト
         $response->assertRedirect(route('admin.home'));
     }
+
+    // editアクション（お支払い方法編集ページ）
     // 未ログインのユーザーはお支払い方法編集ページにアクセスできない
     public function test_guest_cannot_access_subscription_edit()
     {
+        // 一般ユーザーアカウントの非承認
+        $guset = User::factory()->create();
+        $this->assertGuest();
+
+        // お支払い方法編集ページにアクセス
         $response = $this->get(route('subscription.edit'));
+
+        // リダイレクト
         $response->assertRedirect(route('login'));
     }
+
     // ログイン済みの無料会員はお支払い方法編集ページにアクセスできない
     public function test_free_user_cannot_access_subscription_edit()
     {
+        // 一般ユーザーアカウントの承認
         $user = User::factory()->create();
-        $response = $this->actingAs($user)->get(route('subscription.edit'));
+        $this->actingAs($user);
+
+        // お支払い方法編集ページにアクセス
+        $response = $this->get(route('subscription.edit'));
+
+        // リダイレクト
         $response->assertRedirect(route('subscription.create'));
     }
+
     // ログイン済みの有料会員はお支払い方法編集ページにアクセスできる
-    public function test_premium_user_can_access_subscription_edit()
+    public function test_paid_user_can_access_subscription_edit()
     {
+        // 一般ユーザーアカウントの承認
         $user = User::factory()->create();
-        $user->newSubscription('premium_plan', 'price_1PgMVLGeo7j2tfrTS0pOZqj8')->create('pm_card_visa');
-        $response = $this->actingAs($user)->get(route('subscription.edit'));
+        $this->actingAs($user);
+
+        // 有料会員の承認
+        $user->newSubscription(
+            'premium_plan',
+            'price_1PgMVLGeo7j2tfrTS0pOZqj8'
+        )->create('pm_card_visa');
+
+        // お支払い方法編集ページにアクセス
+        $response = $this->get(route('subscription.edit'));
+
+        // アクセス成功したか確認
         $response->assertStatus(200);
     }
+
     // ログイン済みの管理者はお支払い方法編集ページにアクセスできない
     public function test_admin_cannot_access_subscription_edit()
     {
-        $admin = new Admin();
-        $admin->email = 'admin@example.com';
-        $admin->password = Hash::make('nagoyameshi');
-        $admin->save();
-        $response = $this->actingAs($admin, 'admin')->get(route('subscription.edit'));
+        // 管理アカウントの承認
+        $admin = Admin::factory()->create();
+        $this->actingAs($admin, 'admin');
+
+        // お支払い方法編集ページにアクセス
+        $response = $this->get(route('subscription.edit'));
+
+        // リダイレクト
         $response->assertRedirect(route('admin.home'));
     }
+
+    // updateアクション（お支払い方法更新機能）
     // 未ログインのユーザーはお支払い方法を更新できない
-    public function test_guest_cannot_access_subscription_update()
+    public function test_guest_cannot_update_subscription_update()
     {
+        // 一般ユーザーアカウントの非承認
+        $guset = User::factory()->create();
+        $this->assertGuest();
+
+        // visaからmastercardへ変更
         $request_parameter = [
             'paymentMethodId' => 'pm_card_mastercard'
         ];
+
+        // お支払い方法更新ページにアクセス
+        $response = $this->get(route('subscription.update'));
+
+        // 有料プランリクエストの送信
         $response = $this->patch(route('subscription.update'), $request_parameter);
+
+        // リダイレクト
         $response->assertRedirect(route('login'));
     }
+
     // ログイン済みの無料会員はお支払い方法を更新できない
-    public function test_free_user_cannot_access_subscription_update()
+    public function test_free_user_cannot_update_subscription_update()
     {
+        // 一般ユーザーアカウントの承認
         $user = User::factory()->create();
+        $this->actingAs($user);
+
+        // visaからmastercardへ変更
         $request_parameter = [
             'paymentMethodId' => 'pm_card_mastercard'
         ];
-        $response = $this->actingAs($user)->patch(route('subscription.update'), $request_parameter);
+
+        // お支払い方法更新ページにアクセス
+        $response = $this->get(route('subscription.update'));
+
+        // 有料プランリクエストの送信
+        $response = $this->patch(route('subscription.update'), $request_parameter);
+
+        // リダイレクト
         $response->assertRedirect(route('subscription.create'));
     }
+
     // ログイン済みの有料会員はお支払い方法を更新できる
-    public function test_premium_user_can_access_subscription_update()
+    public function test_paid_user_can_update_subscription_update()
     {
+        // 一般ユーザーアカウントの承認
         $user = User::factory()->create();
-        $user->newSubscription('premium_plan', 'price_1PgMVLGeo7j2tfrTS0pOZqj8')->create('pm_card_visa');
-        $original_payment_method_id = $user->defaultPaymentMethod()->id;
+        $this->actingAs($user);
+
+        // 有料会員の承認
+        $user->newSubscription(
+            'premium_plan',
+            'price_1PgMVLGeo7j2tfrTS0pOZqj8'
+        )->create('pm_card_visa');
+
+        // 元のデフォルトの支払い方法のID
+        $default_payment_method_id  = $user->defaultPaymentMethod()->id;
+
+        // visaからmastercardへ変更
         $request_parameter = [
             'paymentMethodId' => 'pm_card_mastercard'
         ];
-        $response = $this->actingAs($user)->patch(route('subscription.update'), $request_parameter);
+
+        // お支払い方法更新ページにアクセス
+        $response = $this->get(route('subscription.update'));
+
+        // 有料プランリクエストの送信
+        $response = $this->patch(route('subscription.update'), $request_parameter);
+
+        // リダイレクト
         $response->assertRedirect(route('home'));
+
+        // 変更後にUserインスタンスをリフレッシュ
         $user->refresh();
-        $this->assertNotEquals($original_payment_method_id, $user->defaultPaymentMethod()->id);
+
+        // 更新できたことを検証
+        $this->assertNotEquals($default_payment_method_id, $user->defaultPaymentMethod()->id);
     }
+
     // ログイン済みの管理者はお支払い方法を更新できない
-    public function test_admin_cannot_access_subscription_update()
+    public function test_admin_cannot_update_subscription_update()
     {
-        $admin = new Admin();
-        $admin->email = 'admin@example.com';
-        $admin->password = Hash::make('nagoyameshi');
-        $admin->save();
+        // 管理アカウントの承認
+        $admin = Admin::factory()->create();
+        $this->actingAs($admin, 'admin');
+
+        // paymentMethodIdパラメータ（支払い方法のID
         $request_parameter = [
             'paymentMethodId' => 'pm_card_mastercard'
         ];
-        $response = $this->actingAs($admin, 'admin')->patch(route('subscription.update'), $request_parameter);
+
+        // お支払い方法更新ページにアクセス
+        $response = $this->get(route('subscription.update'));
+
+        // 有料プランリクエストの送信
+        $response = $this->post(route('subscription.update'), $request_parameter);
+
+        // リダイレクト
         $response->assertRedirect(route('admin.home'));
     }
+
+    // cancelアクション（有料プラン解約ページ）
     // 未ログインのユーザーは有料プラン解約ページにアクセスできない
     public function test_guest_cannot_access_subscription_cancel()
     {
+        // 一般ユーザーアカウントの非承認
+        $guset = User::factory()->create();
+        $this->assertGuest();
+
+        // 有料プラン解約ページにアクセス
         $response = $this->get(route('subscription.cancel'));
+
+        // リダイレクト
         $response->assertRedirect(route('login'));
     }
+
     // ログイン済みの無料会員は有料プラン解約ページにアクセスできない
     public function test_free_user_cannot_access_subscription_cancel()
     {
+        // 一般ユーザーアカウントの承認
         $user = User::factory()->create();
-        $response = $this->actingAs($user)->get(route('subscription.cancel'));
+        $this->actingAs($user);
+
+        // 有料プラン解約ページにアクセス
+        $response = $this->get(route('subscription.cancel'));
+
+        // リダイレクト
         $response->assertRedirect(route('subscription.create'));
     }
+
     // ログイン済みの有料会員は有料プラン解約ページにアクセスできる
-    public function test_premium_user_can_access_subscription_cancel()
+    public function test_paid_user_can_access_subscription_cancel()
     {
+        // 一般ユーザーアカウントの承認
         $user = User::factory()->create();
-        $user->newSubscription('premium_plan', 'price_1PgMVLGeo7j2tfrTS0pOZqj8')->create('pm_card_visa');
-        $response = $this->actingAs($user)->get(route('subscription.cancel'));
+        $this->actingAs($user);
+
+        // 有料会員の承認
+        $user->newSubscription(
+            'premium_plan',
+            'price_1PgMVLGeo7j2tfrTS0pOZqj8'
+        )->create('pm_card_visa');
+
+        // 有料プラン解約ページにアクセス
+        $response = $this->get(route('subscription.cancel'));
+
+        // アクセス成功したか確認
         $response->assertStatus(200);
     }
+
     // ログイン済みの管理者は有料プラン解約ページにアクセスできない
     public function test_admin_cannot_access_subscription_cancel()
     {
-        $admin = new Admin();
-        $admin->email = 'admin@example.com';
-        $admin->password = Hash::make('nagoyameshi');
-        $admin->save();
-        $response = $this->actingAs($admin, 'admin')->get(route('subscription.cancel'));
+        // 管理アカウントの承認
+        $admin = Admin::factory()->create();
+        $this->actingAs($admin, 'admin');
+
+        // 有料プラン解約ページにアクセス
+        $response = $this->get(route('subscription.cancel'));
+
+        // リダイレクト
         $response->assertRedirect(route('admin.home'));
     }
+
+    // destroyアクション（有料プラン解約機能）
     // 未ログインのユーザーは有料プランを解約できない
-    public function test_guest_cannot_access_subscription_destroy()
+    public function test_guest_cannot_destroy_subscription_destroy()
     {
+        // 一般ユーザーアカウントの非承認
+        $guset = User::factory()->create();
+        $this->assertGuest();
+
+        // 解約実行
         $response = $this->delete(route('subscription.destroy'));
+
+        // リダイレクト
         $response->assertRedirect(route('login'));
     }
+
     // ログイン済みの無料会員は有料プランを解約できない
-    public function test_free_user_cannot_access_subscription_destroy()
+    public function test_free_user_cannot_destroy_subscription_destroy()
     {
+        // 一般ユーザーアカウントの承認
         $user = User::factory()->create();
-        $response = $this->actingAs($user)->delete(route('subscription.destroy'));
+        $this->actingAs($user);
+
+        // 解約実行
+        $response = $this->delete(route('subscription.destroy'));
+
+        // リダイレクト
         $response->assertRedirect(route('subscription.create'));
     }
+
     // ログイン済みの有料会員は有料プランを解約できる
-    public function test_premium_user_can_access_subscription_destroy()
+    public function test_paid_user_can_destroy_subscription_destroy()
     {
+        // 一般ユーザーアカウントの承認
         $user = User::factory()->create();
-        $user->newSubscription('dpremium_plan', 'price_1PgMVLGeo7j2tfrTS0pOZqj8')->create('pm_card_visa');
-        $response = $this->actingAs($user)->delete(route('subscription.destroy'));
+        $this->actingAs($user);
+
+        // 有料会員の承認
+        $user->newSubscription(
+            'premium_plan',
+            'price_1PgMVLGeo7j2tfrTS0pOZqj8'
+        )->create('pm_card_visa');
+
+        // 解約実行
+        $response = $this->delete(route('subscription.destroy'));
+
+        // リダイレクト
         $response->assertRedirect(route('home'));
+
+        // 解約後にUserインスタンスをリフレッシュ
         $user->refresh();
+
+        // 解約できたことを検証
         $this->assertFalse($user->subscribed('premium_plan'));
     }
-    // ログイン済みの管理者は有料プランを解約できない
-    public function test_admin_cannot_access_subscription_destroy()
-    {
-        $admin = new Admin();
-        $admin->email = 'admin@example.com';
-        $admin->password = Hash::make('nagoyameshi');
-        $admin->save();
 
-        $response = $this->actingAs($admin, 'admin')->delete(route('subscription.destroy'));
+    // ログイン済みの管理者は有料プランを解約できない
+    public function test_admin_cannot_destroy_subscription_destroy()
+    {
+        // 管理アカウントの承認
+        $admin = Admin::factory()->create();
+        $this->actingAs($admin, 'admin');
+
+        // 解約実行
+        $response = $this->delete(route('subscription.destroy'));
+
+        // リダイレクト
         $response->assertRedirect(route('admin.home'));
     }
 }
-
-// php artisan test tests/Feature/SubscriptionTest.php

@@ -1,13 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Middleware\Subscribed;
+use App\Http\Middleware\NotSubscribed;
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RestaurantController;
 use App\Http\Controllers\SubscriptionController;
-use App\Http\Middleware\Subscribed;
-use App\Http\Middleware\NotSubscribed;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,12 +20,36 @@ use App\Http\Middleware\NotSubscribed;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+// ユーザー側
+// 管理者としてログインしていない
+Route::group(['middleware' => 'guest:admin'], function () {
+    Route::get('/', [HomeController::class, 'index'])->name('home');
+    Route::resource('restaurants', RestaurantController::class)->only(['index', 'show']);
+
+    // 一般ユーザーとしてログイン済み + メール認証済み
+    Route::group(['middleware' => ['auth', 'verified']], function () {
+        Route::resource('user', UserController::class)->only(['index', 'edit', 'update']);
+
+        // 有料プランに未登録
+        Route::group(['middleware' => [NotSubscribed::class]], function () {
+            Route::get('subscription/create', [SubscriptionController::class, 'create'])->name('subscription.create');
+            Route::post('subscription', [SubscriptionController::class, 'store'])->name('subscription.store');
+        });
+
+        // 有料プランに登録済み
+        Route::group(['middleware' => [Subscribed::class]], function () {
+            Route::get('subscription/edit', [SubscriptionController::class, 'edit'])->name('subscription.edit');
+            Route::patch('subscription', [SubscriptionController::class, 'update'])->name('subscription.update');
+            Route::get('subscription/cancel', [SubscriptionController::class, 'cancel'])->name('subscription.cancel');
+            Route::delete('subscription', [SubscriptionController::class, 'destroy'])->name('subscription.destroy');
+        });
+    });
 });
 
 require __DIR__ . '/auth.php';
 
+// 管理者側
+// 管理者としてログイン + 「admin/〇〇」 + 「admin.〇〇」
 Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'auth:admin'], function () {
     Route::get('home', [Admin\HomeController::class, 'index'])->name('home');
     Route::resource('users', Admin\UserController::class)->only(['index', 'show']);
@@ -34,28 +58,3 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'auth:admin
     Route::resource('company', Admin\CompanyController::class)->only(['index', 'edit', 'update']);
     Route::resource('terms', Admin\TermController::class)->only(['index', 'edit', 'update']);
 });
-
-Route::group(['middleware' => 'guest:admin'], function () {
-    Route::get('/', [HomeController::class, 'index'])->name('home');
-});
-
-Route::group(['middleware' => ['auth', 'verified', 'guest:admin']], function () {
-    Route::resource('user', UserController::class)->only(['index', 'edit', 'update']);
-});
-
-Route::group(['middleware' => 'guest:admin'], function () {
-    Route::resource('restaurants', RestaurantController::class)->only(['index', 'show']);
-});
-
-
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('subscription/edit', [SubscriptionController::class, 'edit'])->name('subscription.edit');
-    Route::patch('subscription', [SubscriptionController::class, 'update'])->name('subscription.update');
-    Route::get('subscription/cancel', [SubscriptionController::class, 'cancel'])->name('subscription.cancel');
-    Route::delete('subscription', [SubscriptionController::class, 'destroy'])->name('subscription.destroy');
-})->middleware([Subscribed::class]);
-
-Route::middleware(['auth', 'verified',])->group(function () {
-    Route::get('subscription/create', [SubscriptionController::class, 'create'])->name('subscription.create');
-    Route::post('subscription', [SubscriptionController::class, 'store'])->name('subscription.store');
-})->middleware([NotSubscribed::class]);
