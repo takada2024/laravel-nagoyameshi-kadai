@@ -9,14 +9,15 @@ use Symfony\Component\HttpFoundation\Response;
 class NotSubscribed
 {
     /**
-     * 受信リクエストの処理
+     * Handle an incoming request.
+     *
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (! $request->user()?->subscribed('premium_plan')) {
-            // ユーザーを支払いページへリダイレクトし、サブスクリプションを購入するか尋ねる
-            return redirect('subscription/edit');
-        }
+         if ($request->user()?->subscribed('premium_plan')) {
+             return redirect('subscription/edit');
+         }
 
         return $next($request);
     }

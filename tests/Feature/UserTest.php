@@ -208,7 +208,7 @@ class UserTest extends TestCase
 
         // 管理アカウントの承認
         $admin = Admin::factory()->create();
-        $this->actingAs($admin);
+        $this->actingAs($admin, 'admin');
 
         // 更新「後」の般ユーザーアカウント
         $user_data = [

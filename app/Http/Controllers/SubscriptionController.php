@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -23,20 +22,18 @@ class SubscriptionController extends Controller
      */
     public function store(Request $request)
     {
-        $user = $request->user();
-
         $request->user()->newSubscription(
             'premium_plan',
             'price_1PgMVLGeo7j2tfrTS0pOZqj8'
         )->create($request->paymentMethodId);
 
-        return redirect()->route('home')->with('flash_message', '有料プランの登録が完了しました。');
+        return redirect()->route('home')->with('flash_message', '有料プランへの登録が完了しました。');
     }
 
     /**
      *  edit
      */
-    public function edit(User $user)
+    public function edit()
     {
         $user = Auth::user();
         $intent = $user->createSetupIntent();
@@ -47,13 +44,11 @@ class SubscriptionController extends Controller
     /**
      *  update
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request)
     {
-        $user = $request->user();
+        $request->user()->updateDefaultPaymentMethod($request->paymentMethodId);
 
-        $user->updateDefaultPaymentMethod($request->paymentMethodId);
-
-        return redirect()->route('home')->with('flash_message', 'お支払方法を変更しました。');
+        return redirect()->route('home')->with('flash_message', 'お支払い方法を変更しました。');
     }
 
     /**
@@ -69,13 +64,7 @@ class SubscriptionController extends Controller
      */
     public function destroy(Request $request)
     {
-        $user = $request->user();
-
-        if (!$user->hasStripeId()) {
-            $user->createAsStripeCustomer();
-        }
-
-        $user->subscription('premium_plan')->cancelNow();
+        $request->user()->subscription('premium_plan')->cancelNow();
 
         return redirect()->route('home')->with('flash_message', '有料プランを解約しました。');
     }
