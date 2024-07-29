@@ -16,9 +16,9 @@ class NotSubscribed
 
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->user()?->subscribed('premium_plan')) {
-            return redirect('subscription/edit');
-        }
+         if ($request->user()?->subscribed('premium_plan')) {
+             return redirect('subscription/edit');
+         }
 
         return $next($request);
     }

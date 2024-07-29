@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RestaurantController;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SubscriptionController;
 
 /*
@@ -21,35 +22,36 @@ use App\Http\Controllers\SubscriptionController;
 */
 
 // ユーザー側
-// 管理者としてログインしていない
+// 管理者はログイン不可
 Route::group(['middleware' => 'guest:admin'], function () {
     Route::get('/', [HomeController::class, 'index'])->name('home');
     Route::resource('restaurants', RestaurantController::class)->only(['index', 'show']);
 
-    // 一般ユーザーとしてログイン済み + メール認証済み
+    // 会員登録済みのみログイン可
     Route::group(['middleware' => ['auth', 'verified']], function () {
         Route::resource('user', UserController::class)->only(['index', 'edit', 'update']);
+        Route::resource('restaurants.reviews', ReviewController::class)->only(['index']);
 
-        // 有料プランに未登録
+        // 無料会員のみログイン可
         Route::group(['middleware' => [NotSubscribed::class]], function () {
             Route::get('subscription/create', [SubscriptionController::class, 'create'])->name('subscription.create');
             Route::post('subscription', [SubscriptionController::class, 'store'])->name('subscription.store');
         });
 
-        // 有料プランに登録済み
+        // 有料会員のみログイン可
         Route::group(['middleware' => [Subscribed::class]], function () {
             Route::get('subscription/edit', [SubscriptionController::class, 'edit'])->name('subscription.edit');
             Route::patch('subscription', [SubscriptionController::class, 'update'])->name('subscription.update');
             Route::get('subscription/cancel', [SubscriptionController::class, 'cancel'])->name('subscription.cancel');
             Route::delete('subscription', [SubscriptionController::class, 'destroy'])->name('subscription.destroy');
+            Route::resource('restaurants.reviews', ReviewController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
         });
     });
 });
 
 require __DIR__ . '/auth.php';
 
-// 管理者側
-// 管理者としてログイン + 「admin/〇〇」 + 「admin.〇〇」
+// 管理側
 Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'auth:admin'], function () {
     Route::get('home', [Admin\HomeController::class, 'index'])->name('home');
     Route::resource('users', Admin\UserController::class)->only(['index', 'show']);
