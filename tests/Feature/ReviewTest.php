@@ -608,6 +608,7 @@ class ReviewTest extends TestCase
             'restaurant_id' => $restaurant->id,
             'user_id' => $guest->id
         ]);
+
         // リダイレクト
         $response->assertRedirect(route('login'));
     }
