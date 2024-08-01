@@ -5,6 +5,8 @@ use App\Http\Middleware\Subscribed;
 use App\Http\Middleware\NotSubscribed;
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\TermController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RestaurantController;
 use App\Http\Controllers\SubscriptionController;
@@ -28,6 +30,8 @@ use App\Http\Controllers\FavoriteController;
 Route::group(['middleware' => 'guest:admin'], function () {
     Route::get('/', [HomeController::class, 'index'])->name('home');
     Route::resource('restaurants', RestaurantController::class)->only(['index', 'show']);
+    Route::get('company', [CompanyController::class, 'index'])->name('company.index');
+    Route::get('terms', [TermController::class, 'index'])->name('terms.index');
 
     // 会員登録済みのみログイン可
     Route::group(['middleware' => ['auth', 'verified']], function () {
