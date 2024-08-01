@@ -56,11 +56,11 @@ class ReviewTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        // 店舗アカウントの作成
-        $restaurant = Restaurant::factory()->create();
-
         // 有料会員の作成
         $user->newSubscription('premium_plan', 'price_1PgMVLGeo7j2tfrTS0pOZqj8')->create('pm_card_visa');
+
+        // 店舗アカウントの作成
+        $restaurant = Restaurant::factory()->create();
 
         // 会員側のレビュー一覧ページにアクセス
         $response = $this->get(route('restaurants.reviews.index', $restaurant->id));
@@ -128,11 +128,11 @@ class ReviewTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        // 店舗アカウントの作成
-        $restaurant = Restaurant::factory()->create();
-
         // 有料会員の作成
         $user->newSubscription('premium_plan', 'price_1PgMVLGeo7j2tfrTS0pOZqj8')->create('pm_card_visa');
+
+        // 店舗アカウントの作成
+        $restaurant = Restaurant::factory()->create();
 
         // 会員側のレビュー投稿ページにアクセス
         $response = $this->get(route('restaurants.reviews.create', $restaurant->id));
@@ -332,6 +332,9 @@ class ReviewTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
+        // 有料会員の作成
+        $user->newSubscription('premium_plan', 'price_1PgMVLGeo7j2tfrTS0pOZqj8')->create('pm_card_visa');
+
         // 店舗アカウントの作成
         $restaurant = Restaurant::factory()->create();
 
@@ -340,9 +343,6 @@ class ReviewTest extends TestCase
             'restaurant_id' => $restaurant->id,
             'user_id' => $user->id
         ]);
-
-        // 有料会員の作成
-        $user->newSubscription('premium_plan', 'price_1PgMVLGeo7j2tfrTS0pOZqj8')->create('pm_card_visa');
 
         // 会員側のレビュー編集ページにアクセス
         $response = $this->get(route('restaurants.reviews.edit', [$restaurant->id, $review->id]));
@@ -479,15 +479,15 @@ class ReviewTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        // 他人のアカウントの承認
-        $user_other = User::factory()->create();
-        $this->actingAs($user_other);
-
         // 有料会員の作成
         $user->newSubscription('premium_plan', 'price_1PgMVLGeo7j2tfrTS0pOZqj8')->create('pm_card_visa');
 
         // 店舗アカウントの作成
         $restaurant = Restaurant::factory()->create();
+
+        // 他人のアカウントの承認
+        $user_other = User::factory()->create();
+        $this->actingAs($user_other);
 
         // 他人のレビューの作成
         $review_data_other = Review::factory()->create([

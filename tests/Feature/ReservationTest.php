@@ -116,11 +116,11 @@ class ReservationTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        // 店舗アカウントの作成
-        $restaurant = Restaurant::factory()->create();
-
         // 有料会員の作成
         $user->newSubscription('premium_plan', 'price_1PgMVLGeo7j2tfrTS0pOZqj8')->create('pm_card_visa');
+
+        // 店舗アカウントの作成
+        $restaurant = Restaurant::factory()->create();
 
         // 会員側の予約一覧ページにアクセス
         $response = $this->get(route('restaurants.reservations.create', $restaurant->id));
@@ -159,17 +159,16 @@ class ReservationTest extends TestCase
 
         // 予約データの作成
         $reservation_data = [
-            'reserved_datetime' => now(),
-            'number_of_people' => fake()->numberBetween(1, 50),
-            'restaurant_id' => $restaurant->id,
-            'user_id' => $guset->id
+            'reservation_date' => '2024-10-01',
+            'reservation_time' => '10:00',
+            'number_of_people' => 5
         ];
 
         // 店舗予約の登録リクエストの送信
-        $response = $this->post(route('restaurants.reservations.store', $restaurant->id), $reservation_data);
+        $response = $this->post(route('restaurants.reservations.store', $restaurant), $reservation_data);
 
         // reservations テーブルにレビューが登録されていないことを確認
-        $this->assertDatabaseMissing('reservations', $reservation_data);
+        $this->assertDatabaseMissing('reservations', ['reserved_datetime' => '2024-10-01 10:00', 'number_of_people' => 5]);
 
         // リダイレクト
         $response->assertRedirect(route('login'));
@@ -187,17 +186,16 @@ class ReservationTest extends TestCase
 
         // 予約データの作成
         $reservation_data = [
-            'reserved_datetime' => now(),
-            'number_of_people' => fake()->numberBetween(1, 50),
-            'restaurant_id' => $restaurant->id,
-            'user_id' => $user->id
+            'reservation_date' => '2024-10-01',
+            'reservation_time' => '10:00',
+            'number_of_people' => 5
         ];
 
         // 店舗予約の登録リクエストの送信
-        $response = $this->post(route('restaurants.reservations.store', $restaurant->id), $reservation_data);
+        $response = $this->post(route('restaurants.reservations.store', $restaurant), $reservation_data);
 
         // reservations テーブルにレビューが登録されていないことを確認
-        $this->assertDatabaseMissing('reservations', $reservation_data);
+        $this->assertDatabaseMissing('reservations', ['reserved_datetime' => '2024-10-01 10:00', 'number_of_people' => 5]);
 
         // リダイレクト
         $response->assertRedirect(route('subscription.create'));
@@ -210,28 +208,26 @@ class ReservationTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        // 店舗アカウントの作成
-        $restaurant = Restaurant::factory()->create();
-
         // 有料会員の作成
         $user->newSubscription('premium_plan', 'price_1PgMVLGeo7j2tfrTS0pOZqj8')->create('pm_card_visa');
 
+        $restaurant = Restaurant::factory()->create();
+
         // 予約データの作成
         $reservation_data = [
-            'reserved_datetime' => now(),
-            'number_of_people' => fake()->numberBetween(1, 50),
-            'restaurant_id' => $restaurant->id,
-            'user_id' => $user->id
+            'reservation_date' => '2024-10-01',
+            'reservation_time' => '10:00',
+            'number_of_people' => 5
         ];
 
         // 店舗予約の登録リクエストの送信
-        $response = $this->post(route('restaurants.reservations.store', $restaurant->id), $reservation_data);
+        $response = $this->post(route('restaurants.reservations.store', $restaurant), $reservation_data);
 
         // reservations テーブルにレビューが登録されていることを確認
-        $this->assertDatabaseMissing('reservations', $reservation_data);
+        $this->assertDatabaseHas('reservations', ['reserved_datetime' => '2024-10-01 10:00', 'number_of_people' => 5]);
 
         // リダイレクト
-        $response->assertRedirect(route('admin.home'));
+        $response->assertRedirect(route('reservations.index'));
     }
 
     // ログイン済みの管理者は予約できない
@@ -250,17 +246,16 @@ class ReservationTest extends TestCase
 
         // 予約データの作成
         $reservation_data = [
-            'reserved_datetime' => now(),
-            'number_of_people' => fake()->numberBetween(1, 50),
-            'restaurant_id' => $restaurant->id,
-            'user_id' => $guset->id
+            'reservation_date' => '2024-10-01',
+            'reservation_time' => '10:00',
+            'number_of_people' => 5
         ];
 
         // 店舗予約の登録リクエストの送信
-        $response = $this->post(route('restaurants.reservations.store', $restaurant->id), $reservation_data);
+        $response = $this->post(route('restaurants.reservations.store', $restaurant), $reservation_data);
 
         // reservations テーブルにレビューが登録されていないことを確認
-        $this->assertDatabaseMissing('reservations', $reservation_data);
+        $this->assertDatabaseMissing('reservations', ['reserved_datetime' => '2024-10-01 10:00', 'number_of_people' => 5]);
 
         // リダイレクト
         $response->assertRedirect(route('admin.home'));

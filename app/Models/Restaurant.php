@@ -22,6 +22,7 @@ class Restaurant extends Model
         'seating_capacity',
     ];
 
+    // リレーション
     public function categories()
     {
         return $this->belongsToMany(Category::class)->withTimestamps();
@@ -42,6 +43,12 @@ class Restaurant extends Model
         return $this->hasMany(Reservation::class);
     }
 
+    public function favorite_users()
+    {
+        return $this->belongsToMany(User::class)->withTimestamps();
+    }
+
+    // ソート
     public function ratingSortable($query, $direction)
     {
         return $query->withAvg('reviews', 'score')->orderBy('reviews_avg_score', $direction);

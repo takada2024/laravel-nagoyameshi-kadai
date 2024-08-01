@@ -5,11 +5,12 @@ use App\Http\Middleware\Subscribed;
 use App\Http\Middleware\NotSubscribed;
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RestaurantController;
-use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\FavoriteController;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,10 +49,12 @@ Route::group(['middleware' => 'guest:admin'], function () {
 
             Route::resource('restaurants.reviews', ReviewController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
 
-            Route::get('reservations', [ReservationController::class, 'index'])->name('reservations.index');
-            Route::get('restaurants/{restaurant}/reservations/create', [ReservationController::class, 'create'])->name('restaurants.reservations.create');
-            Route::post('restaurants/{restaurant}/reservations', [ReservationController::class, 'store'])->name('restaurants.reservations.store');
-            Route::delete('reservations/{reservation}', [ReservationController::class, 'destroy'])->name('reservations.destroy');
+            Route::resource('reservations', ReservationController::class)->only(['index', 'destroy']);
+            Route::resource('restaurants.reservations', ReservationController::class)->only(['create', 'store']);
+
+            Route::get('/favorites', [FavoriteController::class, 'index'])->name('favorites.index');
+            Route::post('/favorites/{restaurant_id}', [FavoriteController::class, 'store'])->name('favorites.store');
+            Route::delete('/favorites/{restaurant_id}', [FavoriteController::class, 'destroy'])->name('favorites.destroy');
         });
     });
 });
