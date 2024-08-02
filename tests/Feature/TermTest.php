@@ -23,7 +23,7 @@ class TermTest extends TestCase
         $this->assertGuest();
 
         // 利用規約の作成
-        Term::factory()->create();
+        $term = Term::factory()->create();
 
         // 会員側の店舗一覧ページにアクセス
         $response = $this->get(route('terms.index'));
@@ -40,7 +40,7 @@ class TermTest extends TestCase
         $this->actingAs($user);
 
         // 利用規約の作成
-        Term::factory()->create();
+        $term = Term::factory()->create();
 
         // 会員側の店舗一覧ページにアクセス
         $response = $this->get(route('terms.index'));
@@ -57,7 +57,7 @@ class TermTest extends TestCase
         $this->actingAs($admin, 'admin');
 
         // 利用規約の作成
-        Term::factory()->create();
+        $term = Term::factory()->create();
 
         // 会員側の店舗一覧ページにアクセス
         $response = $this->get(route('terms.index'));

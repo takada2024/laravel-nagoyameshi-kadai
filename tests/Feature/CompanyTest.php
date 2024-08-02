@@ -22,7 +22,7 @@ class CompanyTest extends TestCase
         $this->assertGuest();
 
         // 会社概要の作成
-        Company::factory()->create();
+        $company = Company::factory()->create();
 
         // 会員側の店舗一覧ページにアクセス
         $response = $this->get(route('company.index'));
@@ -39,7 +39,7 @@ class CompanyTest extends TestCase
         $this->actingAs($user);
 
         // 会社概要の作成
-        Company::factory()->create();
+        $company = Company::factory()->create();
 
         // 会員側の店舗一覧ページにアクセス
         $response = $this->get(route('company.index'));
@@ -56,7 +56,7 @@ class CompanyTest extends TestCase
         $this->actingAs($admin, 'admin');
 
         // 会社概要の作成
-        Company::factory()->create();
+        $company = Company::factory()->create();
 
         // 会員側の店舗一覧ページにアクセス
         $response = $this->get(route('company.index'));
@@ -65,6 +65,3 @@ class CompanyTest extends TestCase
         $response->assertRedirect(route('admin.home'));
     }
 }
-
-
-// php artisan test tests/Feature/TermTest.php

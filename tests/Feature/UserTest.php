@@ -225,10 +225,6 @@ class UserTest extends TestCase
         $response = $this->patch(route('user.update', $guset_data), $user_data);
 
         // リダイレクト
-        $response->assertRedirect(route('user.index'));
+        $response->assertRedirect(route('admin.home'));
     }
 }
-
-
-
-//   php artisan test tests/Feature/UserTest.php

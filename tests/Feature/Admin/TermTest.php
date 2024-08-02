@@ -187,6 +187,6 @@ class TermTest extends TestCase
         $this->assertDatabaseHas('terms', $term_data_new);
 
         // リダイレクト
-        $response->assertRedirect(route('admin.company.index'));
+        $response->assertRedirect(route('admin.terms.index'));
     }
 }

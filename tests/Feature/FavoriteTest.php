@@ -87,6 +87,9 @@ class FavoriteTest extends TestCase
         // お気に入り登録リクエストの送信
         $response = $this->post(route('favorites.store', $restaurant->id));
 
+        // restaurant_user テーブルにお気に入りが登録されていないことを確認
+        $this->assertDatabaseMissing('restaurant_user', ['restaurant_id' => $restaurant->id]);
+
         // リダイレクト
         $response->assertRedirect(route('login'));
     }
@@ -103,6 +106,9 @@ class FavoriteTest extends TestCase
 
         // お気に入り登録リクエストの送信
         $response = $this->post(route('favorites.store', $restaurant->id));
+
+        // restaurant_user テーブルにお気に入りが登録されていないことを確認
+        $this->assertDatabaseMissing('restaurant_user', ['restaurant_id' => $restaurant->id]);
 
         // リダイレクト
         $response->assertRedirect(route('subscription.create'));
@@ -124,6 +130,9 @@ class FavoriteTest extends TestCase
         // お気に入り登録リクエストの送信
         $response = $this->post(route('favorites.store', $restaurant->id));
 
+        // restaurant_user テーブルにお気に入りが登録されていることを確認
+        $this->assertDatabaseHas('restaurant_user', ['restaurant_id' => $restaurant->id]);
+
         // アクセス成功したか確認
         $response->assertStatus(302);
     }
@@ -141,6 +150,9 @@ class FavoriteTest extends TestCase
         // お気に入り登録リクエストの送信
         $response = $this->post(route('favorites.store', $restaurant->id));
 
+        // restaurant_user テーブルにお気に入りが登録されていないことを確認
+        $this->assertDatabaseMissing('restaurant_user', ['restaurant_id' => $restaurant->id]);
+
         // リダイレクト
         $response->assertRedirect(route('admin.home'));
     }
@@ -155,6 +167,9 @@ class FavoriteTest extends TestCase
 
         // 店舗アカウントの作成
         $restaurant = Restaurant::factory()->create();
+
+        // お気に入りの作成
+        $guset->favorite_restaurants()->attach($restaurant->id);
 
         // お気に入り削除リクエストの送信
         $response = $this->delete(route('favorites.destroy', $restaurant->id));
@@ -172,6 +187,9 @@ class FavoriteTest extends TestCase
 
         // 店舗アカウントの作成
         $restaurant = Restaurant::factory()->create();
+
+        // お気に入りの作成
+        $user->favorite_restaurants()->attach($restaurant->id);
 
         // お気に入り削除リクエストの送信
         $response = $this->delete(route('favorites.destroy', $restaurant->id));
@@ -193,6 +211,9 @@ class FavoriteTest extends TestCase
         // 店舗アカウントの作成
         $restaurant = Restaurant::factory()->create();
 
+        // お気に入りの作成
+        $user->favorite_restaurants()->attach($restaurant->id);
+
         // お気に入り削除リクエストの送信
         $response = $this->delete(route('favorites.destroy', $restaurant->id));
 
@@ -203,12 +224,19 @@ class FavoriteTest extends TestCase
     // ログイン済みの管理者はお気に入りを解除できない
     public function test_admin_cannot_add_favorite_delete()
     {
+        // 一般ユーザーアカウントの非承認
+        $guset = User::factory()->create();
+        $this->assertGuest();
+
         // 管理アカウントの承認
         $admin = Admin::factory()->create();
         $this->actingAs($admin, 'admin');
 
         // 店舗アカウントの作成
         $restaurant = Restaurant::factory()->create();
+
+        // お気に入りの作成
+        $guset->favorite_restaurants()->attach($restaurant->id);
 
         // お気に入り削除リクエストの送信
         $response = $this->delete(route('favorites.destroy', $restaurant->id));

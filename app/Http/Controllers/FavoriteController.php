@@ -15,7 +15,7 @@ class FavoriteController extends Controller
         $user = Auth::user();
 
         $favorite_restaurants = $user->favorite_restaurants()
-            ->orderBy('created_at', 'desc')
+            ->orderBy('restaurant_user.created_at', 'desc')
             ->paginate(15);
 
         return view('favorites.index', compact('favorite_restaurants'));
