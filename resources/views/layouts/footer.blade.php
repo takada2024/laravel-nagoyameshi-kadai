@@ -13,7 +13,8 @@
             <a href="{{ route('admin.terms.index') }}" class="link-secondary">利用規約</a>
         @else
             <a href="{{ route('company.index') }}" class="link-secondary me-3">会社概要</a>
-            <a href="{{ route('terms.index') }}" class="link-secondary">利用規約</a>
+            <a href="{{ route('terms.index') }}" class="link-secondary me-3">利用規約</a>
+            <a href="{{ route('admin.login') }}" class="link-secondary">管理者側のログイン</a>
         @endif
     </div>
     <p class="text-center text-muted small mb-0">&copy; NAGOYAMESHI All rights reserved.</p>
